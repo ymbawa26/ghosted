@@ -3,6 +3,7 @@ import "./globals.css";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteShell } from "@/components/layout/site-shell";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ghosted.vercel.app"),
@@ -58,6 +59,7 @@ export default function RootLayout({
           <main>{children}</main>
           <SiteFooter />
         </SiteShell>
+        <Analytics />
       </body>
     </html>
   );
