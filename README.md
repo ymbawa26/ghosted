@@ -10,6 +10,8 @@ Users paste a job post and Ghosted returns five explainable scores:
 - Clarity
 - Applicant ROI
 
+  TRY HERE: https://ghosted-ivory.vercel.app
+
 Ghosted does not scrape LinkedIn, does not automate LinkedIn activity, and does not claim that a posting is fake.
 
 ## Stack
