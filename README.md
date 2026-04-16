@@ -14,6 +14,17 @@ Users paste a job post and Ghosted returns five explainable scores:
 
 Ghosted does not scrape LinkedIn, does not automate LinkedIn activity, and does not claim that a posting is fake.
 
+The current input flow accepts:
+
+- job title
+- company name
+- structured location fields (country, region/state, optional city)
+- date posted
+- salary text or a `salary not listed` toggle
+- reposted toggle
+- work mode
+- full pasted job description
+
 ## Stack
 
 - Next.js App Router
@@ -61,9 +72,15 @@ Ghosted uses a deterministic scoring pipeline:
 2. Feature extraction
    The engine extracts explicit signals such as:
    - salary presence
+   - rough compensation positioning
    - posting age
+   - repost clues
    - urgent language
+   - AI-style filler language
    - role clarity
+   - hiring process clarity
+   - benefits specificity
+   - application friction
    - qualification structure
    - skill breadth
    - title-to-seniority mismatch
@@ -115,6 +132,7 @@ test/
 - The MVP uses rule-based scoring, not a trained model.
 - It only evaluates manually pasted job posts.
 - Session storage keeps only the latest analysis for the current browser session.
+- The app does not self-train from prior guesses yet; adaptation should come from explicit user feedback and later calibration work.
 - The system can flag warning signs, but it does not determine whether a posting is fake.
 - The results are decision support, not hiring, legal, or compliance advice.
 

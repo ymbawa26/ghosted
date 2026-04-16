@@ -12,7 +12,10 @@ function daysAgo(days: number) {
 export const strongJobPost: JobPostInput = {
   jobTitle: "Senior Product Designer",
   companyName: "Northstar Health",
-  location: "Boston, MA",
+  location: "Boston, MA, United States",
+  locationCountry: "United States",
+  locationRegion: "MA",
+  locationCity: "Boston",
   datePosted: daysAgo(6),
   salaryRangeText: "$145,000 - $168,000 base",
   workMode: "hybrid",
@@ -39,7 +42,8 @@ Preferred qualifications
 export const inflatedJuniorPost: JobPostInput = {
   jobTitle: "Junior Product Designer",
   companyName: "Velocity Foundry",
-  location: "Remote",
+  location: "United States",
+  locationCountry: "United States",
   datePosted: daysAgo(12),
   workMode: "remote",
   description: `
@@ -55,9 +59,13 @@ Requirements
 export const staleUrgentPost: JobPostInput = {
   jobTitle: "Operations Coordinator",
   companyName: "Summit Logistics",
-  location: "Atlanta, GA",
+  location: "Atlanta, GA, United States",
+  locationCountry: "United States",
+  locationRegion: "GA",
+  locationCity: "Atlanta",
   datePosted: daysAgo(120),
   workMode: "on-site",
+  isReposted: true,
   description: `
 We are urgently hiring and need someone to start immediately.
 
@@ -73,7 +81,8 @@ Qualifications
 export const contradictoryRemotePost: JobPostInput = {
   jobTitle: "Product Manager",
   companyName: "Signal Harbor",
-  location: "Remote - United States",
+  location: "United States",
+  locationCountry: "United States",
   datePosted: daysAgo(18),
   workMode: "remote",
   description: `
@@ -94,6 +103,7 @@ export const vagueGenericPost: JobPostInput = {
   jobTitle: "Marketing Specialist",
   companyName: "Apex Growth",
   location: "United States",
+  locationCountry: "United States",
   workMode: "unspecified",
   description: `
 We are a fast-paced, dynamic environment looking for a rockstar team player.

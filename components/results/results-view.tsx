@@ -215,6 +215,9 @@ export function ResultsView() {
             <div className="mt-6 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-[#f3efe7]">
               {analysis.overview.interpretation}
             </div>
+            <p className="mt-4 text-sm leading-7 text-slate-300">
+              {analysis.overview.authenticityNote}
+            </p>
             <p className="mt-6 text-sm leading-7 text-slate-300">
               {analysis.overview.summaryVerdict}
             </p>
@@ -244,6 +247,11 @@ export function ResultsView() {
             <p className="mt-4 text-sm leading-7 text-slate-700">
               {analysis.whyThisMatters}
             </p>
+            {analysis.overview.compensationNote ? (
+              <p className="mt-4 text-sm leading-7 text-slate-700">
+                {analysis.overview.compensationNote}
+              </p>
+            ) : null}
             <p className="mt-4 text-sm leading-7 text-slate-500">
               {analysis.methodologyNote}
             </p>

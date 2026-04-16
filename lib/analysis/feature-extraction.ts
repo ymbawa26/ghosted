@@ -1,13 +1,22 @@
 import {
   ACTION_VERBS,
+  AI_HYPE_PHRASES,
+  AI_STYLE_PHRASES,
+  APPLICATION_FRICTION_PHRASES,
+  BENEFIT_PHRASES,
   BUZZWORDS,
+  CONTRACT_PHRASES,
   FILLER_PHRASES,
   LEADERSHIP_VERBS,
+  OUTCOME_PHRASES,
   PREFERRED_HEADINGS,
+  PROCESS_CLARITY_PHRASES,
   QUALIFICATION_HEADINGS,
+  REPOST_PHRASES,
   RESPONSIBILITY_HEADINGS,
   TECH_SKILLS,
 } from "@/lib/analysis/constants";
+import { analyzeCompensation } from "@/lib/analysis/compensation";
 import type {
   ExtractedFeatures,
   JobPostInput,
@@ -213,6 +222,9 @@ export function extractJobPostFeatures(input: JobPostInput): ExtractedFeatures {
   const leadershipVerbCount = countMatches(normalizedText, LEADERSHIP_VERBS);
   const buzzwordCount = countMatches(normalizedText, BUZZWORDS);
   const fillerCount = countMatches(normalizedText, FILLER_PHRASES);
+  const aiStyleCount = countMatches(normalizedText, AI_STYLE_PHRASES);
+  const aiHypeCount = countMatches(normalizedText, AI_HYPE_PHRASES);
+  const repostCount = countMatches(normalizedText, REPOST_PHRASES);
   const detectedSkills = TECH_SKILLS.filter((skill) =>
     new RegExp(`\\b${skill.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(
       normalizedText,
@@ -251,10 +263,11 @@ export function extractJobPostFeatures(input: JobPostInput): ExtractedFeatures {
       normalizedText,
     );
   const hasSalary =
-    Boolean(input.salaryRangeText?.trim()) ||
-    /\$\s?\d[\d,]*(?:\s?-\s?\$?\d[\d,]*)?|\bper hour\b|\bper year\b|\bsalary\b/i.test(
-      normalizedDescription,
-    );
+    !input.salaryNotListed &&
+    (Boolean(input.salaryRangeText?.trim()) ||
+      /\$\s?\d[\d,]*(?:\s?-\s?\$?\d[\d,]*)?|\bper hour\b|\bper year\b|\bsalary\b/i.test(
+        normalizedDescription,
+      ));
   const jobPostAgeDays = computeAgeInDays(input.datePosted);
   const urgentLanguagePresent =
     /\burgent\b|\bimmediate(?:ly)?\b|\basap\b|\bstart immediately\b|\bactively hiring\b/i.test(
@@ -263,6 +276,34 @@ export function extractJobPostFeatures(input: JobPostInput): ExtractedFeatures {
   const oldButUrgentMismatch = Boolean(
     urgentLanguagePresent && typeof jobPostAgeDays === "number" && jobPostAgeDays > 45,
   );
+  const repostLanguagePresent = repostCount > 0;
+  const repostConcernSignal = Boolean(
+    input.isReposted ||
+      (repostLanguagePresent &&
+        typeof jobPostAgeDays === "number" &&
+        jobPostAgeDays > 21),
+  );
+  const hasHiringProcessClarity = hasAnyPattern(
+    normalizedText,
+    PROCESS_CLARITY_PHRASES,
+  );
+  const hasBenefitsInfo = hasAnyPattern(normalizedText, BENEFIT_PHRASES);
+  const hasApplicationFrictionSignal = hasAnyPattern(
+    normalizedText,
+    APPLICATION_FRICTION_PHRASES,
+  );
+  const hasContractLanguage = hasAnyPattern(normalizedText, CONTRACT_PHRASES);
+  const hasOutcomeSpecificity =
+    hasAnyPattern(normalizedText, OUTCOME_PHRASES) ||
+    /\bmetrics?\b|\bmeasure\b|\bgoal\b|\bimpact\b|\bsuccess in this role\b/i.test(
+      normalizedText,
+    );
+  const aiStyleSignal =
+    aiStyleCount >= 2 ||
+    (aiStyleCount >= 1 && buzzwordCount >= 2) ||
+    (aiStyleCount >= 1 && fillerCount >= 2);
+  const aiHypeSignal =
+    aiHypeCount >= 2 || (aiHypeCount >= 1 && !hasClearResponsibilities);
   const juniorTitleWithHighExperience = Boolean(
     yearsExperienceMentioned &&
       ["intern", "junior"].includes(titleSeniority) &&
@@ -293,6 +334,7 @@ export function extractJobPostFeatures(input: JobPostInput): ExtractedFeatures {
       (poorRequiredPreferredSeparation &&
         ["intern", "junior", "unknown", "mid"].includes(titleSeniority)),
   );
+  const compensationAnalysis = analyzeCompensation(input, titleSeniority);
 
   return {
     normalizedDescription,
@@ -324,6 +366,20 @@ export function extractJobPostFeatures(input: JobPostInput): ExtractedFeatures {
       input.workMode,
       normalizedText,
     ),
+    repostLanguagePresent,
+    repostConcernSignal,
+    hasHiringProcessClarity,
+    hasBenefitsInfo,
+    hasApplicationFrictionSignal,
+    hasContractLanguage,
+    hasOutcomeSpecificity,
+    aiStyleSignal,
+    aiHypeSignal,
+    parsedSalaryMinAnnual: compensationAnalysis.parsedSalaryMinAnnual,
+    parsedSalaryMaxAnnual: compensationAnalysis.parsedSalaryMaxAnnual,
+    compensationPosition: compensationAnalysis.compensationPosition,
+    compensationNote: compensationAnalysis.compensationNote,
+    underpaidSignal: compensationAnalysis.underpaidSignal,
     titleSeniority,
     yearsExperienceMentioned,
     juniorTitleWithHighExperience,

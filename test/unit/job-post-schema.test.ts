@@ -17,9 +17,13 @@ function makeValidInput() {
   return {
     jobTitle: "Product Designer",
     companyName: "Northstar Health",
-    location: "Boston, MA",
+    locationCountry: "United States" as const,
+    locationRegion: "MA",
+    locationCity: "Boston",
     datePosted: "2026-04-01",
     salaryRangeText: "$115,000 - $135,000 base",
+    salaryNotListed: false,
+    isReposted: false,
     workMode: "hybrid" as const,
     description: makeDescription(),
   };
@@ -37,7 +41,6 @@ describe("validateJobPostInput", () => {
       ...makeValidInput(),
       jobTitle: " ",
       companyName: "",
-      location: "   ",
       description: " ",
     });
 
@@ -47,7 +50,6 @@ describe("validateJobPostInput", () => {
       expect(getJobPostFieldErrors(result)).toEqual({
         jobTitle: "Job title is required.",
         companyName: "Company name is required.",
-        location: "Location is required.",
         description: `Paste at least ${MIN_DESCRIPTION_LENGTH} characters from the job description so Ghosted has enough context to evaluate the posting.`,
       });
     }
@@ -80,6 +82,7 @@ describe("validateJobPostInput", () => {
     if (result.success) {
       expect(result.data.datePosted).toBeUndefined();
       expect(result.data.salaryRangeText).toBeUndefined();
+      expect(result.data.location).toBe("Boston, MA, United States");
     }
   });
 
@@ -108,6 +111,22 @@ describe("validateJobPostInput", () => {
       );
       expect(errors.description).toBe(
         `Job descriptions must be ${MAX_DESCRIPTION_LENGTH.toLocaleString()} characters or fewer.`,
+      );
+    }
+  });
+
+  it("rejects conflicting salary input when salary is marked as missing", () => {
+    const result = validateJobPostInput({
+      ...makeValidInput(),
+      salaryRangeText: "$100,000",
+      salaryNotListed: true,
+    });
+
+    expect(result.success).toBe(false);
+
+    if (!result.success) {
+      expect(getJobPostFieldErrors(result).salaryRangeText).toBe(
+        "Remove the salary text or uncheck 'salary not listed.'",
       );
     }
   });

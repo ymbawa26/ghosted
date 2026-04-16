@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { JobPostInput } from "@/lib/analysis/types";
+import type { JobPostInput, LocationCountry } from "@/lib/analysis/types";
+import { LOCATION_COUNTRIES } from "@/lib/validation/location-options";
 
 const MAX_SHORT_TEXT = 120;
 export const MAX_SALARY_TEXT_LENGTH = 160;
@@ -13,6 +14,8 @@ export const workModeSchema = z.enum([
   "on-site",
   "unspecified",
 ]);
+
+export const locationCountrySchema = z.enum(LOCATION_COUNTRIES);
 
 const requiredTrimmedString = (fieldLabel: string, maxLength = MAX_SHORT_TEXT) =>
   z
@@ -71,9 +74,13 @@ const optionalDateSchema = z.preprocess(
 export const jobPostSchema = z.object({
   jobTitle: requiredTrimmedString("Job title"),
   companyName: requiredTrimmedString("Company name"),
-  location: requiredTrimmedString("Location"),
+  locationCountry: locationCountrySchema,
+  locationRegion: optionalTrimmedString(MAX_SHORT_TEXT),
+  locationCity: optionalTrimmedString(MAX_SHORT_TEXT),
   datePosted: optionalDateSchema,
   salaryRangeText: optionalTrimmedString(MAX_SALARY_TEXT_LENGTH),
+  salaryNotListed: z.boolean().default(false),
+  isReposted: z.boolean().default(false),
   workMode: workModeSchema,
   description: z
     .string()
@@ -86,16 +93,38 @@ export const jobPostSchema = z.object({
       MAX_DESCRIPTION_LENGTH,
       `Job descriptions must be ${MAX_DESCRIPTION_LENGTH.toLocaleString()} characters or fewer.`,
     ),
-});
+})
+  .superRefine((values, context) => {
+    if (values.salaryNotListed && values.salaryRangeText) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["salaryRangeText"],
+        message: "Remove the salary text or uncheck 'salary not listed.'",
+      });
+    }
+  })
+  .transform((values) => ({
+    ...values,
+    salaryRangeText: values.salaryNotListed ? undefined : values.salaryRangeText,
+    location: formatLocationLabel({
+      locationCountry: values.locationCountry,
+      locationRegion: values.locationRegion,
+      locationCity: values.locationCity,
+    }),
+  }));
 
 export type JobPostValidationErrors = Partial<Record<keyof JobPostInput, string>>;
 
 export type JobPostFormValues = {
   jobTitle: string;
   companyName: string;
-  location: string;
+  locationCountry: LocationCountry;
+  locationRegion: string;
+  locationCity: string;
   datePosted: string;
   salaryRangeText: string;
+  salaryNotListed: boolean;
+  isReposted: boolean;
   workMode: JobPostInput["workMode"];
   description: string;
 };
@@ -103,12 +132,28 @@ export type JobPostFormValues = {
 export const initialJobPostFormValues: JobPostFormValues = {
   jobTitle: "",
   companyName: "",
-  location: "",
+  locationCountry: "United States",
+  locationRegion: "",
+  locationCity: "",
   datePosted: "",
   salaryRangeText: "",
+  salaryNotListed: false,
+  isReposted: false,
   workMode: "unspecified",
   description: "",
 };
+
+export function formatLocationLabel({
+  locationCountry,
+  locationRegion,
+  locationCity,
+}: {
+  locationCountry: LocationCountry;
+  locationRegion?: string;
+  locationCity?: string;
+}) {
+  return [locationCity, locationRegion, locationCountry].filter(Boolean).join(", ");
+}
 
 export function getJobPostFieldErrors(
   result: { success: false; error: z.ZodError },
