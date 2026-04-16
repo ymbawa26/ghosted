@@ -10,7 +10,7 @@ const sections = [
   {
     title: "Explainable by design",
     body:
-      "Ghosted is built around deterministic signals such as freshness, salary transparency, role scope, requirement breadth, and wording clarity. Every score is tied to signals that can be shown back to the user.",
+      "Ghosted is built around deterministic signals such as freshness, salary transparency, rough compensation positioning, role scope, requirement breadth, repost clues, AI-style filler language, and wording clarity. Every score is tied to signals that can be shown back to the user.",
   },
   {
     title: "Focused on the posting, not the person",
@@ -25,7 +25,7 @@ const sections = [
   {
     title: "MVP limitations",
     body:
-      "This first version relies on structured rule-based analysis of manually pasted job text. It should be treated as decision support, not certainty or legal/compliance advice.",
+      "This first version relies on structured rule-based analysis of manually pasted job text. Rough compensation comparisons are heuristic and should be treated as directional only. It should be treated as decision support, not certainty or legal/compliance advice.",
   },
 ];
 

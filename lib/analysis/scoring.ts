@@ -130,6 +130,12 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
     );
   }
 
+  if (features.repostConcernSignal) {
+    seriousnessAdjustments.push(
+      buildAdjustment("reposted or renewed role signals", -6, "warning"),
+    );
+  }
+
   if (features.hasClearResponsibilities) {
     seriousnessAdjustments.push(
       buildAdjustment("clear responsibilities", 10, "positive"),
@@ -157,6 +163,18 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
   } else if (features.structureQuality < 40) {
     seriousnessAdjustments.push(
       buildAdjustment("weak posting structure", -7, "warning"),
+    );
+  }
+
+  if (features.hasHiringProcessClarity) {
+    seriousnessAdjustments.push(
+      buildAdjustment("hiring process details are mentioned", 5, "positive"),
+    );
+  }
+
+  if (features.aiStyleSignal) {
+    seriousnessAdjustments.push(
+      buildAdjustment("templated or AI-style posting language", -4, "warning"),
     );
   }
 
@@ -198,6 +216,26 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
     );
   }
 
+  if (features.hasBenefitsInfo) {
+    transparencyAdjustments.push(
+      buildAdjustment("benefits or total-comp details are present", 4, "positive"),
+    );
+  }
+
+  if (features.compensationPosition === "below-typical") {
+    transparencyAdjustments.push(
+      buildAdjustment("listed pay looks below a rough market range", -8, "warning"),
+    );
+  } else if (features.compensationPosition === "within-typical") {
+    transparencyAdjustments.push(
+      buildAdjustment("listed pay looks within a rough market range", 4, "positive"),
+    );
+  } else if (features.compensationPosition === "above-typical") {
+    transparencyAdjustments.push(
+      buildAdjustment("listed pay looks above a rough market range", 3, "positive"),
+    );
+  }
+
   if (features.hasClearResponsibilities) {
     transparencyAdjustments.push(
       buildAdjustment("role scope is described concretely", 10, "positive"),
@@ -220,7 +258,13 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
 
   if (features.contradictoryLocationLanguage) {
     transparencyAdjustments.push(
-      buildAdjustment("location wording appears contradictory", -8, "warning"),
+      buildAdjustment("location wording appears contradictory", -10, "warning"),
+    );
+  }
+
+  if (features.hasHiringProcessClarity) {
+    transparencyAdjustments.push(
+      buildAdjustment("hiring process expectations are described", 5, "positive"),
     );
   }
 
@@ -316,6 +360,18 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
     );
   }
 
+  if (features.aiStyleSignal) {
+    clarityAdjustments.push(
+      buildAdjustment("overly templated or AI-style wording", -8, "warning"),
+    );
+  }
+
+  if (features.aiHypeSignal) {
+    clarityAdjustments.push(
+      buildAdjustment("AI-heavy hype without much concrete detail", -5, "warning"),
+    );
+  }
+
   if (features.contradictoryLocationLanguage) {
     clarityAdjustments.push(
       buildAdjustment("remote or location wording appears inconsistent", -12, "warning"),
@@ -328,10 +384,16 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
     );
   }
 
-  const seriousnessScore = finalizeScore(50, seriousnessAdjustments);
-  const transparencyScore = finalizeScore(46, transparencyAdjustments);
+  if (features.hasOutcomeSpecificity) {
+    clarityAdjustments.push(
+      buildAdjustment("posting describes outcomes or success measures", 6, "positive"),
+    );
+  }
+
+  const seriousnessScore = finalizeScore(58, seriousnessAdjustments);
+  const transparencyScore = finalizeScore(52, transparencyAdjustments);
   const requirementInflationScore = finalizeScore(26, inflationAdjustments);
-  const clarityScore = finalizeScore(50, clarityAdjustments);
+  const clarityScore = finalizeScore(54, clarityAdjustments);
 
   const roiAdjustments: ScoreAdjustment[] = [];
 
@@ -365,6 +427,34 @@ export function scoreJobPost(features: ExtractedFeatures): AnalysisScores {
 
   if (features.oldButUrgentMismatch) {
     roiAdjustments.push(buildAdjustment("urgent language on an older post raises efficiency concerns", -5, "warning"));
+  }
+
+  if (features.hasBenefitsInfo) {
+    roiAdjustments.push(
+      buildAdjustment("benefits context improves applicant decision quality", 4, "positive"),
+    );
+  }
+
+  if (features.hasApplicationFrictionSignal) {
+    roiAdjustments.push(
+      buildAdjustment("application process may include extra friction", -7, "warning"),
+    );
+  }
+
+  if (features.hasContractLanguage) {
+    roiAdjustments.push(
+      buildAdjustment("temporary or contract language may narrow long-term ROI", -4, "warning"),
+    );
+  }
+
+  if (features.underpaidSignal) {
+    roiAdjustments.push(
+      buildAdjustment("listed pay may be below a rough typical range", -10, "warning"),
+    );
+  } else if (features.compensationPosition === "within-typical") {
+    roiAdjustments.push(
+      buildAdjustment("listed pay looks roughly market-aligned", 4, "positive"),
+    );
   }
 
   const applicantRoiScore = finalizeRoiScore(

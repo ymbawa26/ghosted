@@ -1,4 +1,12 @@
 export type WorkMode = "remote" | "hybrid" | "on-site" | "unspecified";
+export type LocationCountry =
+  | "United States"
+  | "Canada"
+  | "United Kingdom"
+  | "Australia"
+  | "Germany"
+  | "India"
+  | "Other";
 export type TitleSeniority =
   | "intern"
   | "junior"
@@ -15,13 +23,23 @@ export type ScoreKey =
   | "clarity"
   | "applicantRoi";
 export type Sentiment = "positive" | "warning";
+export type CompensationPosition =
+  | "below-typical"
+  | "within-typical"
+  | "above-typical"
+  | "unknown";
 
 export type JobPostInput = {
   jobTitle: string;
   companyName: string;
   location: string;
+  locationCountry: LocationCountry;
+  locationRegion?: string;
+  locationCity?: string;
   datePosted?: string;
   salaryRangeText?: string;
+  salaryNotListed?: boolean;
+  isReposted?: boolean;
   workMode: WorkMode;
   description: string;
 };
@@ -53,6 +71,20 @@ export type ExtractedFeatures = {
   hasReportingStructure: boolean;
   hasConcreteLocation: boolean;
   contradictoryLocationLanguage: boolean;
+  repostLanguagePresent: boolean;
+  repostConcernSignal: boolean;
+  hasHiringProcessClarity: boolean;
+  hasBenefitsInfo: boolean;
+  hasApplicationFrictionSignal: boolean;
+  hasContractLanguage: boolean;
+  hasOutcomeSpecificity: boolean;
+  aiStyleSignal: boolean;
+  aiHypeSignal: boolean;
+  parsedSalaryMinAnnual?: number;
+  parsedSalaryMaxAnnual?: number;
+  compensationPosition: CompensationPosition;
+  compensationNote?: string;
+  underpaidSignal: boolean;
   titleSeniority: TitleSeniority;
   yearsExperienceMentioned?: number;
   juniorTitleWithHighExperience: boolean;
@@ -87,6 +119,8 @@ export type AnalysisResult = {
     location: string;
     summaryVerdict: string;
     interpretation: string;
+    authenticityNote: string;
+    compensationNote?: string;
   };
   scores: AnalysisScores;
   warnings: string[];

@@ -26,6 +26,96 @@ export const FILLER_PHRASES = [
   "must be passionate",
 ];
 
+export const AI_STYLE_PHRASES = [
+  "exciting opportunity",
+  "highly motivated",
+  "ideal candidate",
+  "join our dynamic team",
+  "results-driven",
+  "innovative environment",
+  "fast-paced environment",
+  "passionate professional",
+  "self-starter mindset",
+  "hit the ground running",
+];
+
+export const AI_HYPE_PHRASES = [
+  "ai-powered",
+  "genai",
+  "llm",
+  "large language model",
+  "prompt engineering",
+  "copilot",
+  "automation-first",
+];
+
+export const REPOST_PHRASES = [
+  "reposted",
+  "re-posted",
+  "reopened",
+  "re-opened",
+  "still hiring",
+  "backfill",
+  "renewed posting",
+  "position reopened",
+];
+
+export const PROCESS_CLARITY_PHRASES = [
+  "interview process",
+  "interview stages",
+  "recruiter screen",
+  "hiring manager",
+  "portfolio review",
+  "onsite interview",
+  "final round",
+  "decision timeline",
+];
+
+export const BENEFIT_PHRASES = [
+  "health insurance",
+  "medical",
+  "dental",
+  "vision",
+  "401(k)",
+  "pto",
+  "paid time off",
+  "parental leave",
+  "equity",
+  "bonus",
+  "wellness stipend",
+];
+
+export const APPLICATION_FRICTION_PHRASES = [
+  "take-home assignment",
+  "case study",
+  "project exercise",
+  "assessment",
+  "work sample",
+  "multiple rounds",
+  "cover letter required",
+  "weekend project",
+];
+
+export const CONTRACT_PHRASES = [
+  "contract",
+  "contract-to-hire",
+  "temporary",
+  "temp-to-hire",
+  "1099",
+  "freelance",
+  "fixed term",
+];
+
+export const OUTCOME_PHRASES = [
+  "success in this role",
+  "key metrics",
+  "kpis",
+  "outcomes",
+  "measurable impact",
+  "performance indicators",
+  "goal",
+];
+
 export const ACTION_VERBS = [
   "build",
   "design",
