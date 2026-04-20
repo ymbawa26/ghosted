@@ -41,7 +41,6 @@ describe("AnalysisForm", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Job title is required.")).toBeInTheDocument();
     expect(screen.getByText("Company name is required.")).toBeInTheDocument();
-    expect(screen.getByText("Location is required.")).toBeInTheDocument();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -53,8 +52,13 @@ describe("AnalysisForm", () => {
           analysis: analyzeJobPost({
             jobTitle: "Product Designer",
             companyName: "Northstar Health",
-            location: "Boston, MA",
+            location: "Boston, MA, United States",
+            locationCountry: "United States",
+            locationRegion: "MA",
+            locationCity: "Boston",
             salaryRangeText: "$115,000 - $135,000 base",
+            salaryNotListed: false,
+            isReposted: false,
             workMode: "hybrid",
             description: makeDescription(),
           }),
@@ -72,7 +76,9 @@ describe("AnalysisForm", () => {
 
     await user.type(screen.getByLabelText("Job title"), "Product Designer");
     await user.type(screen.getByLabelText("Company name"), "Northstar Health");
-    await user.type(screen.getByLabelText("Location"), "Boston, MA");
+    await user.selectOptions(screen.getByLabelText("Country"), "United States");
+    await user.selectOptions(screen.getByLabelText("State"), "MA");
+    await user.type(screen.getByLabelText("City"), "Boston");
     await user.selectOptions(screen.getByLabelText("Work mode"), "hybrid");
     await user.type(screen.getByLabelText("Full job description"), makeDescription());
     await user.type(

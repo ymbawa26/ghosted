@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveLatestAnalysis } from "@/lib/analysis/session";
-import type { AnalysisResult } from "@/lib/analysis/types";
+import type { AnalysisResult, LocationCountry } from "@/lib/analysis/types";
+import {
+  LOCATION_COUNTRIES,
+  LOCATION_REGION_OPTIONS,
+} from "@/lib/validation/location-options";
 import {
   getJobPostFieldErrors,
   initialJobPostFormValues,
@@ -25,6 +29,19 @@ const workModes = [
   { value: "on-site", label: "On-site" },
 ] as const;
 
+function getRegionLabel(country: LocationCountry) {
+  switch (country) {
+    case "United States":
+      return "State";
+    case "Canada":
+      return "Province";
+    case "Australia":
+      return "State / territory";
+    default:
+      return "Region";
+  }
+}
+
 export function AnalysisForm() {
   const router = useRouter();
   const [formValues, setFormValues] = useState<JobPostFormValues>(
@@ -39,6 +56,7 @@ export function AnalysisForm() {
 
   const descriptionLength = formValues.description.trim().length;
   const hasRecommendedLength = descriptionLength >= MIN_DESCRIPTION_LENGTH;
+  const regionOptions = LOCATION_REGION_OPTIONS[formValues.locationCountry];
 
   function updateField<K extends keyof JobPostFormValues>(
     fieldName: K,
@@ -47,11 +65,23 @@ export function AnalysisForm() {
     setFormValues((currentValues) => ({
       ...currentValues,
       [fieldName]: value,
+      ...(fieldName === "locationCountry"
+        ? { locationRegion: "", locationCity: "" }
+        : {}),
+      ...(fieldName === "salaryNotListed" && value === true
+        ? { salaryRangeText: "" }
+        : {}),
     }));
 
     setFieldErrors((currentErrors) => ({
       ...currentErrors,
       [fieldName]: undefined,
+      ...(fieldName === "locationCountry"
+        ? { locationRegion: undefined, locationCity: undefined }
+        : {}),
+      ...(fieldName === "salaryNotListed"
+        ? { salaryRangeText: undefined }
+        : {}),
     }));
     setFormMessage(null);
     setFormStatus("idle");
@@ -170,22 +200,34 @@ export function AnalysisForm() {
           ) : null}
         </div>
         <div className="space-y-2">
-          <label htmlFor="location" className="text-sm font-medium text-slate-800">
-            Location
+          <label
+            htmlFor="locationCountry"
+            className="text-sm font-medium text-slate-800"
+          >
+            Country
           </label>
-          <input
-            id="location"
-            name="location"
-            autoComplete="address-level2"
-            value={formValues.location}
-            onChange={(event) => updateField("location", event.target.value)}
+          <select
+            id="locationCountry"
+            name="locationCountry"
+            value={formValues.locationCountry}
+            onChange={(event) =>
+              updateField(
+                "locationCountry",
+                event.target.value as JobPostFormValues["locationCountry"],
+              )
+            }
             className={`${fieldClassName} ${
-              fieldErrors.location ? "border-warning" : "border-border"
+              fieldErrors.locationCountry ? "border-warning" : "border-border"
             }`}
-            placeholder="Boston, MA"
-          />
-          {fieldErrors.location ? (
-            <p className="text-sm text-warning">{fieldErrors.location}</p>
+          >
+            {LOCATION_COUNTRIES.map((country) => (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            ))}
+          </select>
+          {fieldErrors.locationCountry ? (
+            <p className="text-sm text-warning">{fieldErrors.locationCountry}</p>
           ) : null}
         </div>
         <div className="space-y-2">
@@ -211,6 +253,72 @@ export function AnalysisForm() {
         </div>
         <div className="space-y-2">
           <label
+            htmlFor="locationRegion"
+            className="text-sm font-medium text-slate-800"
+          >
+            {getRegionLabel(formValues.locationCountry)}
+          </label>
+          {regionOptions ? (
+            <select
+              id="locationRegion"
+              name="locationRegion"
+              value={formValues.locationRegion}
+              onChange={(event) => updateField("locationRegion", event.target.value)}
+              className={`${fieldClassName} ${
+                fieldErrors.locationRegion ? "border-warning" : "border-border"
+              }`}
+            >
+              <option value="">Select {getRegionLabel(formValues.locationCountry).toLowerCase()}</option>
+              {regionOptions.map((region) => (
+                <option key={region.value} value={region.value}>
+                  {region.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              id="locationRegion"
+              name="locationRegion"
+              autoComplete="address-level1"
+              value={formValues.locationRegion}
+              onChange={(event) => updateField("locationRegion", event.target.value)}
+              className={`${fieldClassName} ${
+                fieldErrors.locationRegion ? "border-warning" : "border-border"
+              }`}
+              placeholder="State, region, or province"
+            />
+          )}
+          {fieldErrors.locationRegion ? (
+            <p className="text-sm text-warning">{fieldErrors.locationRegion}</p>
+          ) : null}
+        </div>
+        <div className="space-y-2">
+          <label
+            htmlFor="locationCity"
+            className="text-sm font-medium text-slate-800"
+          >
+            City
+          </label>
+          <input
+            id="locationCity"
+            name="locationCity"
+            autoComplete="address-level2"
+            value={formValues.locationCity}
+            onChange={(event) => updateField("locationCity", event.target.value)}
+            className={`${fieldClassName} ${
+              fieldErrors.locationCity ? "border-warning" : "border-border"
+            }`}
+            placeholder="Boston"
+          />
+          <p className="text-xs leading-5 text-slate-500">
+            Optional, but helpful for location-specific salary comparisons.
+          </p>
+          {fieldErrors.locationCity ? (
+            <p className="text-sm text-warning">{fieldErrors.locationCity}</p>
+          ) : null}
+        </div>
+        <div className="space-y-2">
+          <label
             htmlFor="salaryRangeText"
             className="text-sm font-medium text-slate-800"
           >
@@ -226,10 +334,22 @@ export function AnalysisForm() {
               fieldErrors.salaryRangeText ? "border-warning" : "border-border"
             }`}
             placeholder="$115,000 - $135,000 base"
+            disabled={formValues.salaryNotListed}
           />
+          <label className="flex items-center gap-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={formValues.salaryNotListed}
+              onChange={(event) =>
+                updateField("salaryNotListed", event.target.checked)
+              }
+              className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+            />
+            Salary was not listed in the post
+          </label>
           <p className="text-xs leading-5 text-slate-500">
-            Optional. Ghosted only checks whether pay information is present and
-            concrete.
+            Ghosted can also estimate whether a listed salary looks below,
+            within, or above a rough market range.
           </p>
           {fieldErrors.salaryRangeText ? (
             <p className="text-sm text-warning">{fieldErrors.salaryRangeText}</p>
@@ -262,6 +382,23 @@ export function AnalysisForm() {
           {fieldErrors.workMode ? (
             <p className="text-sm text-warning">{fieldErrors.workMode}</p>
           ) : null}
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <div className="rounded-[1.35rem] border border-border bg-white px-4 py-4">
+            <label className="flex items-center gap-3 text-sm font-medium text-slate-800">
+              <input
+                type="checkbox"
+                checked={formValues.isReposted}
+                onChange={(event) => updateField("isReposted", event.target.checked)}
+                className="h-4 w-4 rounded border-border text-accent focus:ring-accent"
+              />
+              Mark this as reposted if you already know the listing has been renewed or posted again
+            </label>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              Ghosted will also check the pasted text itself for repost signals, so
+              this is optional.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -312,7 +449,9 @@ export function AnalysisForm() {
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-border bg-surface-muted px-4 py-3 text-sm leading-6 text-slate-600">
           No account required. Paste the posting, run the analysis, and Ghosted
-          will carry the result into the results view automatically.
+          will carry the result into the results view automatically. The scoring
+          engine also checks the post for AI-style filler, repost clues,
+          compensation realism, hiring-process clarity, and more.
         </div>
       )}
 

@@ -15,6 +15,13 @@ export function generateTopWarnings(
     candidates.push({ text: "Missing salary transparency", severity: 9 });
   }
 
+  if (features.underpaidSignal) {
+    candidates.push({
+      text: "Listed pay appears below a rough typical range for the title",
+      severity: 9,
+    });
+  }
+
   if (!features.hasClearResponsibilities) {
     candidates.push({ text: "Vague responsibilities", severity: 9 });
   }
@@ -47,6 +54,13 @@ export function generateTopWarnings(
     });
   }
 
+  if (features.repostConcernSignal) {
+    candidates.push({
+      text: "Reposted or renewed role signals",
+      severity: 7,
+    });
+  }
+
   if (features.contradictoryLocationLanguage) {
     candidates.push({
       text: "Contradictory remote, hybrid, or on-site wording",
@@ -65,6 +79,27 @@ export function generateTopWarnings(
     candidates.push({
       text: "Buzzword-heavy language with limited specifics",
       severity: 7,
+    });
+  }
+
+  if (features.aiStyleSignal) {
+    candidates.push({
+      text: "Templated or AI-style filler language",
+      severity: 6,
+    });
+  }
+
+  if (features.hasApplicationFrictionSignal) {
+    candidates.push({
+      text: "Application process may include extra friction",
+      severity: 6,
+    });
+  }
+
+  if (!features.hasHiringProcessClarity) {
+    candidates.push({
+      text: "Limited clarity on the hiring process",
+      severity: 5,
     });
   }
 

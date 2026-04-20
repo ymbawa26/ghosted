@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test";
 async function fillCommonFields(page: import("@playwright/test").Page) {
   await page.getByLabel("Job title").fill("Senior Product Designer");
   await page.getByLabel("Company name").fill("Northstar Health");
-  await page.getByLabel("Location").fill("Boston, MA");
+  await page.getByLabel("Country").selectOption("United States");
+  await page.getByLabel("State").selectOption("MA");
+  await page.getByLabel("City").fill("Boston");
   await page.getByLabel("Salary range text").fill("$145,000 - $168,000 base");
   await page.getByLabel("Work mode").selectOption("hybrid");
 }
@@ -48,7 +50,7 @@ test("submits an inflated junior posting and surfaces warning flags", async ({
 
   await page.getByLabel("Job title").fill("Junior Product Designer");
   await page.getByLabel("Company name").fill("Velocity Foundry");
-  await page.getByLabel("Location").fill("Remote");
+  await page.getByLabel("Country").selectOption("United States");
   await page.getByLabel("Work mode").selectOption("remote");
   await page
     .getByLabel("Full job description")
@@ -64,7 +66,7 @@ Requirements
   });
 
   await expect(page).toHaveURL(/\/results$/);
-  await expect(page.getByText("Likely high-friction")).toBeVisible();
+  await expect(page.getByText("Likely authentic, but high-friction")).toBeVisible();
   await expect(
     page.locator("li").filter({
       hasText:

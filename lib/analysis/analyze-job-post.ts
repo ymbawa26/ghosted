@@ -2,7 +2,11 @@ import { extractJobPostFeatures } from "@/lib/analysis/feature-extraction";
 import { METHODOLOGY_NOTE, WHY_THIS_MATTERS } from "@/lib/analysis/explanations";
 import { scoreJobPost } from "@/lib/analysis/scoring";
 import type { AnalysisResult, JobPostInput } from "@/lib/analysis/types";
-import { getInterpretation, getSummaryVerdict } from "@/lib/analysis/verdict";
+import {
+  getAuthenticityNote,
+  getInterpretation,
+  getSummaryVerdict,
+} from "@/lib/analysis/verdict";
 import { generateTopWarnings } from "@/lib/analysis/warnings";
 
 export function analyzeJobPost(input: JobPostInput): AnalysisResult {
@@ -19,6 +23,8 @@ export function analyzeJobPost(input: JobPostInput): AnalysisResult {
       location: input.location,
       summaryVerdict,
       interpretation,
+      authenticityNote: getAuthenticityNote(scores, extractedFeatures),
+      compensationNote: extractedFeatures.compensationNote,
     },
     scores,
     warnings,
